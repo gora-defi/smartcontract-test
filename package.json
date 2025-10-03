@@ -1,0 +1,23 @@
+{
+  "name": "gora",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "FABC LLC",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "npx hardhat ignition deploy ./ignition/modules/deploy.ts --network BscTestnet",
+    "verify": "npx hardhat run scripts/verify.ts --network BscTestnet",
+    "mainnet-deploy": "npx hardhat ignition deploy ./ignition/modules/deploy.ts --network BscMainnet",
+    "mainnet-verify": "npx hardhat run scripts/verify.ts --network BscMainnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "hardhat": "^2.26.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.3.0"
+  }
+}
