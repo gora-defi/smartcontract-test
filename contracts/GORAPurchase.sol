@@ -4,10 +4,11 @@ pragma solidity ^0.8.20;
 import "./interface/ILPinterface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 
 
-contract Purchase is AccessControl {
+contract Purchase is AccessControl, ReentrancyGuard {
 
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN");
 
@@ -49,7 +50,7 @@ contract Purchase is AccessControl {
     }
 
     //changesOwnership
-    function changesOwnership(address newAdmin)public onlyRole(ADMIN_ROLE){
+    function changesOwnership(address newAdmin)public onlyRole(ADMIN_ROLE) nonReentrant() {
          address _temp = ADMIN;
         _revokeRole(ADMIN_ROLE, ADMIN);
         _grantRole(ADMIN_ROLE, newAdmin);
@@ -57,24 +58,24 @@ contract Purchase is AccessControl {
         emit OwnershipChanged(_temp, ADMIN);
     }
 
-    function withdrawShare() public onlyRole(ADMIN_ROLE){
+    function withdrawShare() public onlyRole(ADMIN_ROLE) nonReentrant() {
         uint256 amount = IERC20(USDT).balanceOf(address(this));
         require(amount > 0, "Invalid amount");
         SafeERC20.safeTransfer(IERC20(USDT), ADMIN, amount);
     }
 
 
-    function recoverTokenFromLP(address token) public onlyRole(ADMIN_ROLE){
+    function recoverTokenFromLP(address token) public onlyRole(ADMIN_ROLE) nonReentrant() {
         ILPinterface(LPAddress).recoverToken(token);
     }
 
-    function recoverToken(address token) public onlyRole(ADMIN_ROLE){
+    function recoverToken(address token) public onlyRole(ADMIN_ROLE) nonReentrant() {
         uint256 amount = IERC20(token).balanceOf(address(this));
         require(amount > 0, "Invalid amount");
         SafeERC20.safeTransfer(IERC20(token), ADMIN, amount);
     }
 
-    function recoverBNB() public onlyRole(ADMIN_ROLE) returns (bool sent) {
+    function recoverBNB() public onlyRole(ADMIN_ROLE) nonReentrant() returns (bool sent) {
         uint256 amount = address(this).balance;
         if(amount > 0) {
             (sent, ) = payable(msg.sender).call{value: amount}("");        
@@ -83,7 +84,7 @@ contract Purchase is AccessControl {
     }
 
     //changeLP address
-    function changeLPAddress(address newAddress)public onlyRole(ADMIN_ROLE){
+    function changeLPAddress(address newAddress)public onlyRole(ADMIN_ROLE) nonReentrant() {
         address _temp = LPAddress;
         LPAddress = newAddress; 
         emit LPAdressChanged(_temp, LPAddress);
@@ -92,7 +93,7 @@ contract Purchase is AccessControl {
 
     //AddLiquidity
 
-    function addLiquidity(uint256 amount) public onlyRole(ADMIN_ROLE) {
+    function addLiquidity(uint256 amount) public onlyRole(ADMIN_ROLE) nonReentrant() {
         if(amount > 0) {
             SafeERC20.safeTransferFrom(IERC20(USDT), msg.sender, LPAddress, amount);
         }
@@ -101,7 +102,7 @@ contract Purchase is AccessControl {
 
     //Buy 
 
-    function Buy(uint256 amount) external {
+    function Buy(uint256 amount) external nonReentrant() {
         require(amount >= MIN_PURCHASE, "Buy: minimum purchase limit is 100 USDT");
         require(amount <= MAX_PURCHASE, "Buy: Maximum purchase limit exceeded");
         uint256 lpfee = (amount * LP_USDT_PERMILE)/1000;
@@ -133,7 +134,7 @@ contract Purchase is AccessControl {
 
    //rebuy 
 
-    function reBuy(uint256 amount) external {
+    function reBuy(uint256 amount) external nonReentrant() {
         require(amount >= MIN_PURCHASE, "Buy: minimum purchase limit is 100 USDT");
         require(amount <= MAX_PURCHASE, "Buy: Maximum purchase limit exceeded");
         uint256 lpfee = (amount * LP_USDT_PERMILE)/1000;
@@ -163,7 +164,7 @@ contract Purchase is AccessControl {
 
     //sell 
 
-    function sell(uint256 amount ) external {
+    function sell(uint256 amount ) external nonReentrant() {
         require(amount > 0, "purchase: Invalid value");
         uint256 sellAmount = getSellTokenAmount(amount);
         User storage user = userDetails[msg.sender];

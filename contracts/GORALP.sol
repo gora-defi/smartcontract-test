@@ -46,7 +46,7 @@ contract GORALP is AccessControl{
         Controller = _controller;
     }
 
-    function recoverToken(address token) public onlyRole(CONTROLLER_ROLE){
+    function recoverToken(address token) public onlyRole(ADMIN_ROLE){
         require(token != USDT, "LP: Invalid token");
         uint256 amount = IERC20(token).balanceOf(address(this));
         require(amount > 0, "Invalid amount");
@@ -68,6 +68,7 @@ contract GORALP is AccessControl{
 
     function releaseToken(uint256 amount, address receiver) public  onlyRole(CONTROLLER_ROLE) {
         require(amount > 0, "Invalid amount");
+        require(msg.sender == Controller, "controller only can call");
         SafeERC20.safeTransfer(IERC20(USDT), receiver,amount);
         emit TransferUSDT(address(this), receiver, amount);
     }
