@@ -3,8 +3,10 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract GORALP is AccessControl{
+
+contract GORALP is AccessControl, ReentrancyGuard {
 
     bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER");
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN");
@@ -33,7 +35,7 @@ contract GORALP is AccessControl{
         InitialPrice = 0.01 * 1e18;
     }
  
-    function changeOwnership(address newAdmin) public onlyRole(ADMIN_ROLE) {
+    function changeOwnership(address newAdmin) public onlyRole(ADMIN_ROLE) nonReentrant(){
         address _temp = Admin;
         _revokeRole(ADMIN_ROLE, Admin);
         _grantRole(ADMIN_ROLE, newAdmin);
@@ -41,16 +43,9 @@ contract GORALP is AccessControl{
         emit OwnershipChanged(_temp, Admin);
     }
 
-    function setController(address _controller) external onlyRole(ADMIN_ROLE) {
+    function setController(address _controller) external onlyRole(ADMIN_ROLE) nonReentrant() {
         _grantRole(CONTROLLER_ROLE, _controller);
         Controller = _controller;
-    }
-
-    function recoverToken(address token) public onlyRole(ADMIN_ROLE){
-        require(token != USDT, "LP: Invalid token");
-        uint256 amount = IERC20(token).balanceOf(address(this));
-        require(amount > 0, "Invalid amount");
-        SafeERC20.safeTransfer(IERC20(token), Admin, amount);
     }
 
     function getPrice() public view returns(uint256) {
@@ -66,31 +61,11 @@ contract GORALP is AccessControl{
         return price;
     }
 
-    function releaseToken(uint256 amount, address receiver) public  onlyRole(CONTROLLER_ROLE) {
+    function releaseToken(uint256 amount, address receiver) public nonReentrant() onlyRole(CONTROLLER_ROLE) {
         require(amount > 0, "Invalid amount");
         require(msg.sender == Controller, "controller only can call");
         SafeERC20.safeTransfer(IERC20(USDT), receiver,amount);
         emit TransferUSDT(address(this), receiver, amount);
     }
-
-    function recoverBNB() public onlyRole(ADMIN_ROLE) returns (bool sent) {
-        uint256 amount = address(this).balance;
-        if(amount > 0) {
-            (sent, ) = payable(msg.sender).call{value: amount}("");        
-        }
-        return sent;
-    }
-
-    receive() payable external  {
-        emit ETHReceived(msg.sender, msg.value);
-    }
-
-    fallback() payable external  {
-        emit ETHReceived(msg.sender, msg.value);
-    }
-
-
-
-
 
 }

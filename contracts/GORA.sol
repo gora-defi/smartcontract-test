@@ -3,9 +3,11 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 
-contract GORA is ERC20,AccessControl{
+
+contract GORA is ERC20,AccessControl, ReentrancyGuard {
 
     bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER");
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN");
@@ -22,14 +24,14 @@ contract GORA is ERC20,AccessControl{
         Admin = adminAddress;
     }
 
-    function mint(address reciver,uint256 amount) public onlyRole(CONTROLLER_ROLE) {
+    function mint(address reciver,uint256 amount) public onlyRole(CONTROLLER_ROLE) nonReentrant() {
         require(amount > 0, "GORA: INVALID value");
         _mint(reciver, amount);
         emit Mint(address(0), reciver, amount);
         
     }
 
-    function burn(uint256 amount) public onlyRole(CONTROLLER_ROLE){
+    function burn(uint256 amount) public onlyRole(CONTROLLER_ROLE) nonReentrant() {
         require(amount > 0, "GORA: INVALID value");
         _burn(msg.sender, amount);
         emit Burn(msg.sender, address(0), amount);

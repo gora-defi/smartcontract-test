@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "./interface/ILPinterface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 
 
@@ -15,15 +15,15 @@ contract Purchase is AccessControl, ReentrancyGuard {
     address public ADMIN;
     address public LPAddress;
 
-    address immutable public USDT;
+    address immutable public BUSD;
     address immutable public GORA;
 
     uint256 MIN_PURCHASE = 100 * 1e18;
     uint256 MAX_PURCHASE = 1000 * 1e18;
 
     uint256 TOKENALLOCATION_PERMILE = 300;
-    uint256 ADMIN_USDT_PERMILE = 500;
-    uint256 LP_USDT_PERMILE = 500;
+    uint256 ADMIN_BUSD_PERMILE = 500;
+    uint256 LP_BUSD_PERMILE = 500;
 
     mapping(address => User) internal userDetails;
 
@@ -36,11 +36,11 @@ contract Purchase is AccessControl, ReentrancyGuard {
     event ETHReceived(address from, uint256 received);
 
     
-    constructor(address _admin, address _lpaddress, address _usdt, address _gora)  {
+    constructor(address _admin, address _lpaddress, address _BUSD, address _gora)  {
         ADMIN = _admin;
         LPAddress = _lpaddress;
         GORA = _gora;
-        USDT = _usdt;
+        BUSD = _BUSD;
         _grantRole(ADMIN_ROLE, ADMIN);
     }
 
@@ -58,31 +58,6 @@ contract Purchase is AccessControl, ReentrancyGuard {
         emit OwnershipChanged(_temp, ADMIN);
     }
 
-    function withdrawShare() public onlyRole(ADMIN_ROLE) nonReentrant() {
-        uint256 amount = IERC20(USDT).balanceOf(address(this));
-        require(amount > 0, "Invalid amount");
-        SafeERC20.safeTransfer(IERC20(USDT), ADMIN, amount);
-    }
-
-
-    function recoverTokenFromLP(address token) public onlyRole(ADMIN_ROLE) nonReentrant() {
-        ILPinterface(LPAddress).recoverToken(token);
-    }
-
-    function recoverToken(address token) public onlyRole(ADMIN_ROLE) nonReentrant() {
-        uint256 amount = IERC20(token).balanceOf(address(this));
-        require(amount > 0, "Invalid amount");
-        SafeERC20.safeTransfer(IERC20(token), ADMIN, amount);
-    }
-
-    function recoverBNB() public onlyRole(ADMIN_ROLE) nonReentrant() returns (bool sent) {
-        uint256 amount = address(this).balance;
-        if(amount > 0) {
-            (sent, ) = payable(msg.sender).call{value: amount}("");        
-        }
-        return sent;
-    }
-
     //changeLP address
     function changeLPAddress(address newAddress)public onlyRole(ADMIN_ROLE) nonReentrant() {
         address _temp = LPAddress;
@@ -95,70 +70,72 @@ contract Purchase is AccessControl, ReentrancyGuard {
 
     function addLiquidity(uint256 amount) public onlyRole(ADMIN_ROLE) nonReentrant() {
         if(amount > 0) {
-            SafeERC20.safeTransferFrom(IERC20(USDT), msg.sender, LPAddress, amount);
+            SafeERC20.safeTransferFrom(IERC20(BUSD), msg.sender, LPAddress, amount);
         }
         emit LiquidityAdded(ADMIN, amount);
     }
 
     //Buy 
 
-    function Buy(uint256 amount) external nonReentrant() {
-        require(amount >= MIN_PURCHASE, "Buy: minimum purchase limit is 100 USDT");
+    function Buy(uint256 amount) external nonReentrant {
+        require(amount >= MIN_PURCHASE, "Buy: minimum purchase limit is 100 BUSD");
         require(amount <= MAX_PURCHASE, "Buy: Maximum purchase limit exceeded");
-        uint256 lpfee = (amount * LP_USDT_PERMILE)/1000;
-        uint256 adminfee = (amount * ADMIN_USDT_PERMILE)/1000;
-        uint256 userAllocation = (amount * TOKENALLOCATION_PERMILE)/1000;
-        if(totalSaleVolume < 10000 * 1e18) {
-            userAllocation = (amount * 500)/1000;
-        }
-       uint256 tokenAmount = getTokenAmount(userAllocation);
-        userDetails[msg.sender] = User(
-            msg.sender,
-            amount * 2,
-            amount * 2,
-            ILPinterface(LPAddress).getPrice(),
-            tokenAmount,
-            0
-        );
-        totalSaleVolume += amount; 
-       if(lpfee > 0) {
-            SafeERC20.safeTransferFrom(IERC20(USDT), msg.sender, LPAddress, lpfee);
-            emit LiquidityAdded(msg.sender, lpfee);
-       }
-        if(adminfee > 0) {
-            SafeERC20.safeTransferFrom(IERC20(USDT), msg.sender, address(this), adminfee);
-            emit AdminFeeAdded(adminfee);
-       }
-       GORAinterface(GORA).mint(msg.sender,tokenAmount);
-    }
 
-   //rebuy 
+        address BUSD = BUSD;
+        address lpAddr = LPAddress;
+        address gora = GORA;
 
-    function reBuy(uint256 amount) external nonReentrant() {
-        require(amount >= MIN_PURCHASE, "Buy: minimum purchase limit is 100 USDT");
-        require(amount <= MAX_PURCHASE, "Buy: Maximum purchase limit exceeded");
-        uint256 lpfee = (amount * LP_USDT_PERMILE)/1000;
-        uint256 adminfee = (amount * ADMIN_USDT_PERMILE)/1000;
-        uint256 userAllocation = (amount * TOKENALLOCATION_PERMILE)/1000;
-        if(totalSaleVolume < 10000 * 1e18) {
-            userAllocation = (amount * 500)/1000;
-        }        
+        uint256 totalVolume = totalSaleVolume;
+        uint256 lpfee = (amount * LP_BUSD_PERMILE) / 1000;
+        uint256 adminfee = (amount * ADMIN_BUSD_PERMILE) / 1000;
+
+        uint256 userAllocation = (totalVolume < 10_000 * 1e18)
+            ? (amount * 500) / 1000
+            : (amount * TOKENALLOCATION_PERMILE) / 1000;
+
         uint256 tokenAmount = getTokenAmount(userAllocation);
-        userDetails[msg.sender].totalInvestment +=  amount * 2;
-        userDetails[msg.sender].totalTokenAllocated += tokenAmount;
-        userDetails[msg.sender].currentInvestment += amount * 2;
-        
-        totalSaleVolume += amount; 
-       if(lpfee > 0) {
-            SafeERC20.safeTransferFrom(IERC20(USDT), msg.sender, LPAddress, lpfee);
-            emit LiquidityAdded(msg.sender, lpfee);
-       }
-        if(adminfee > 0) {
-            SafeERC20.safeTransferFrom(IERC20(USDT), msg.sender, address(this), adminfee);
-            emit AdminFeeAdded(adminfee);
-       }
-        GORAinterface(GORA).mint(msg.sender,tokenAmount);
+        uint256 doubledAmount = amount * 2;
+        uint256 lpPrice = ILPinterface(lpAddr).getPrice();
 
+
+        User storage u = userDetails[msg.sender];
+
+        try IERC20(BUSD).transferFrom(msg.sender, lpAddr, lpfee) {
+            emit LiquidityAdded(msg.sender, lpfee);
+        } catch {
+            revert("Buy: LP fee transfer failed");
+        }
+        try IERC20(BUSD).transferFrom(msg.sender, ADMIN, adminfee) {
+            emit AdminFeeAdded(adminfee);
+        } catch {
+            revert("Buy: Admin fee transfer failed");
+        }
+        try GORAinterface(gora).mint(msg.sender, tokenAmount) {
+        } catch {
+            totalSaleVolume -= amount;
+            delete userDetails[msg.sender];
+            revert("Buy: Token mint failed, refunded");
+        }
+
+        if (u.totalSellVolume == 0 && u.totalInvestment == 0) {
+            // First-time buyer
+            u.userWallet = msg.sender;
+            u.totalInvestment = doubledAmount;
+            u.currentInvestment = doubledAmount;
+            u.lastBuyPrice = lpPrice;
+            u.totalTokenAllocated = tokenAmount;
+            u.totalSellVolume = 0;
+        } else {
+            // Repeat buyer (reBuy)
+            u.totalInvestment += doubledAmount;
+            u.currentInvestment += doubledAmount;
+            u.totalTokenAllocated += tokenAmount;
+            u.lastBuyPrice = lpPrice;
+        }
+
+        unchecked {
+            totalSaleVolume = totalVolume + amount;
+        }
     }
 
 
@@ -185,6 +162,7 @@ contract Purchase is AccessControl, ReentrancyGuard {
 
      function getSellTokenAmount(uint256 amount) public view returns(uint256 tokenAmount) {
         uint256 tokenPrice = ILPinterface(LPAddress).getPrice();
+        require(tokenPrice > 0, "Purchase: Invalid price");
         uint256 adjustedPrice = (tokenPrice * 82) / 100;
         tokenAmount = (amount * adjustedPrice) / 1e18;
         return tokenAmount;
@@ -192,16 +170,9 @@ contract Purchase is AccessControl, ReentrancyGuard {
 
     function getTokenAmount(uint256 amount) public view  returns(uint256 tokenAmount) {
         uint256 tokenPrice = ILPinterface(LPAddress).getPrice();
+        require(tokenPrice > 0, "Purchase: Invalid price");
         tokenAmount = (amount / tokenPrice) * 1e18;
         return tokenAmount;
-    }
-
-    receive() payable external  {
-        emit ETHReceived(msg.sender, msg.value);
-    }
-
-    fallback() payable external  {
-        emit ETHReceived(msg.sender, msg.value);
     }
 
 

@@ -144,3 +144,29 @@ Chai
 
 TypeScript
  – Strong typing
+
+
+
+
+
+ *🌟 You're Invited: Townhall Time! 🌟*
+
+*🗓 Agenda:*
+
+_1️⃣ Team Updates_
+ 🔧 Tech Team
+ 👥 D5art Emp Team
+ 📚 D5art Edu Team
+ 🧠 Creative Team
+
+_2️⃣ Fun Game Activity 🎮_
+_3️⃣  Closing Talk 🎤_
+
+🕓 When: Today at 5:30 PM IST | 4:00 PM GST  
+*🔗 Join Meeting:*
+https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZGM2MDM3YjQtMDBhYS00ZTc2LTkwZmItZmM0NjdlMmI4ZjQ0%40thread.v2/0?context=%7b%22Tid%22%3a%223bd08ab7-5102-4cd6-870a-23a343442664%22%2c%22Oid%22%3a%22cc84722f-83a5-477c-ba7b-7745f7d14473%22%7d
+
+📅 Date: 09 oct, 2025
+⏰ 5:30 PM – 6:30 PM (GMT+05:30)
+
+_📣 Team Leads – Please be ready with your updates!_
