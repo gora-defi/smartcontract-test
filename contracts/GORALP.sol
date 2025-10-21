@@ -16,21 +16,21 @@ contract GORALP is AccessControl, ReentrancyGuard {
     address public Controller;
 
 
-    address immutable public USDT;
+    address immutable public BUSD;
     address immutable public GORA;
 
     uint256 InitialPrice;
 
 
-    event TransferUSDT(address from, address to, uint256 amount);
+    event TransferBUSD(address from, address to, uint256 amount);
     event ETHReceived(address from, uint256 received);
     event OwnershipChanged(address prevAdmin, address newAdmin);
 
-    constructor (address USDTAddress,address GORAAddress,address adminAddress) {
+    constructor (address BUSDAddress,address GORAAddress,address adminAddress) {
         _grantRole(ADMIN_ROLE,adminAddress);
         _grantRole(DEFAULT_ADMIN_ROLE, adminAddress);
         Admin = adminAddress;
-        USDT =  USDTAddress;
+        BUSD =  BUSDAddress;
         GORA = GORAAddress;
         InitialPrice = 0.01 * 1e18;
     }
@@ -49,7 +49,7 @@ contract GORALP is AccessControl, ReentrancyGuard {
     }
 
     function getPrice() public view returns(uint256) {
-        uint256 reservedA = IERC20(USDT).balanceOf(address(this));   //decimal 18
+        uint256 reservedA = IERC20(BUSD).balanceOf(address(this));   //decimal 18
         if(reservedA == 0) {
             return InitialPrice;
         }
@@ -64,8 +64,8 @@ contract GORALP is AccessControl, ReentrancyGuard {
     function releaseToken(uint256 amount, address receiver) public nonReentrant() onlyRole(CONTROLLER_ROLE) {
         require(amount > 0, "Invalid amount");
         require(msg.sender == Controller, "controller only can call");
-        SafeERC20.safeTransfer(IERC20(USDT), receiver,amount);
-        emit TransferUSDT(address(this), receiver, amount);
+        SafeERC20.safeTransfer(IERC20(BUSD), receiver,amount);
+        emit TransferBUSD(address(this), receiver, amount);
     }
 
 }

@@ -4,26 +4,26 @@ import "@nomicfoundation/hardhat-toolbox";
 const config: HardhatUserConfig = {
     etherscan: {
       apiKey: {
-        BscMainnet: "Q6VCHDYPPATQHPS4CR3AUUQ41ARAMSXZA4",
+        bscTestnet: "Q6VCHDYPPATQHPS4CR3AUUQ41ARAMSXZA4",
       },
     customChains: [
     {
-      network: "BscMainnet",
-      chainId: 56,
+      network: "bscTestnet",
+      chainId: 97,
       urls: {
-        apiURL: "https://api.etherscan.io/v2/api?chainid=56",
-        browserURL: "https://bscscan.com/"
+        apiURL: "https://api.etherscan.io/v2/api?chainid=97&apikey=Q6VCHDYPPATQHPS4CR3AUUQ41ARAMSXZA4",
+        browserURL: "https://testnet.bscscan.com/"
       }
     },]
     },
     networks: {
       BscTestnet: {
         url: "https://data-seed-prebsc-2-s1.binance.org:8545/",
-        accounts: ['']
+        accounts: ['a6a6cbe826ae0753ea6652869340b06224430e7558bae1637d384418cd7f8f9d']
       },
       BscMainnet: {
         url:"https://bnb-mainnet.g.alchemy.com/v2/3BH10F7T5x3xp5eOUF9vhTnu7MIv7yz_",
-        accounts: ['']
+        accounts: ['a6a6cbe826ae0753ea6652869340b06224430e7558bae1637d384418cd7f8f9d']
       },
     },
     solidity: {

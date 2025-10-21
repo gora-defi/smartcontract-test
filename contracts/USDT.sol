@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 
-contract USDT is ERC20,AccessControl{
+contract BUSD is ERC20,AccessControl{
 
     bytes32 public constant CONTROLLER_ROLE = keccak256("CONTROLLER");
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN");
