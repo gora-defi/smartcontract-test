@@ -171,7 +171,7 @@ contract Purchase is AccessControl, ReentrancyGuard {
     function getTokenAmount(uint256 amount) public view  returns(uint256 tokenAmount) {
         uint256 tokenPrice = ILPinterface(LPAddress).getPrice();
         require(tokenPrice > 0, "Purchase: Invalid price");
-        tokenAmount = (amount / tokenPrice) * 1e18;
+        tokenAmount = (amount * 1e18) / tokenPrice;
         return tokenAmount;
     }
 
