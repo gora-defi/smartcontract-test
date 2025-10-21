@@ -2,7 +2,7 @@ Purchase Contract – Hardhat Project
 
 This project implements and tests a DeFi Purchase Contract that integrates:
 
-USDT (ERC20)
+BUSD (ERC20)
 
 GORA (ERC20)
 
@@ -28,7 +28,7 @@ npx hardhat test
 npx hardhat test test/PurchaseContract.ts
 
 ⚙️ Contracts Overview
-1. USDT (Mock ERC20)
+1. BUSD (Mock ERC20)
 
 Basic ERC20 stablecoin for testing.
 
@@ -44,7 +44,7 @@ Supports minting/burning via CONTROLLER_ROLE.
 
 3. GORALP (Liquidity Pool)
 
-Custom liquidity pool handling USDT ↔ GORA swaps.
+Custom liquidity pool handling BUSD ↔ GORA swaps.
 
 Supports price discovery (getPrice()).
 
@@ -56,11 +56,11 @@ Main contract for user interaction.
 
 Features:
 
-Buy(uint256 amount) – Buy GORA with USDT.
+Buy(uint256 amount) – Buy GORA with BUSD.
 
-reBuy(uint256 amount) – Reinvest USDT into GORA.
+reBuy(uint256 amount) – Reinvest BUSD into GORA.
 
-sell(uint256 amount) – Sell GORA back to USDT.
+sell(uint256 amount) – Sell GORA back to BUSD.
 
 addLiquidity(uint256 amount) – Admin adds liquidity to LP.
 
@@ -68,7 +68,7 @@ withdrawShare() – Admin withdraws LP shares.
 
 getUserDetails(address user) – Fetch user investment details.
 
-getSellTokenAmount(uint256 goraAmount) – Estimate USDT received on selling GORA.
+getSellTokenAmount(uint256 goraAmount) – Estimate BUSD received on selling GORA.
 
  Test Cases
 
@@ -78,11 +78,11 @@ User Scenarios
 
  Deploy LP, check initial price.
 
- Buy GORA with USDT.
+ Buy GORA with BUSD.
 
  ReBuy GORA after initial purchase.
 
- Sell GORA back to USDT.
+ Sell GORA back to BUSD.
 
  Check updated LP reserves and price after each action.
 
@@ -96,13 +96,13 @@ Admin Scenarios
 
 Complex Scenario (Combined Flow)
 
-User buys GORA with USDT.
+User buys GORA with BUSD.
 
 Admin adds liquidity.
 
 User sells GORA (burn event validation).
 
-User rebuys with USDT.
+User rebuys with BUSD.
 
 Admin adds more liquidity.
 
@@ -110,19 +110,19 @@ User sells again with updated price checks.
 
 🚀 Example Test Run
 GORA: 0x...
-USDT: 0x...
+BUSD: 0x...
 lp: 0x...
 purchase: 0x...
 
 # Scenario Logs
-Price: 0.01 USDT per GORA
+Price: 0.01 BUSD per GORA
 User Details: [balance, invested, withdrawn, etc...]
 Sell Volume Calculated: 123
 SellTokenAmount: 2000
 
 📂 Project Structure
 contracts/
- ├── USDT.sol
+ ├── BUSD.sol
  ├── GORA.sol
  ├── GORALP.sol
  └── Purchase.sol
@@ -145,28 +145,3 @@ Chai
 TypeScript
  – Strong typing
 
-
-
-
-
- *🌟 You're Invited: Townhall Time! 🌟*
-
-*🗓 Agenda:*
-
-_1️⃣ Team Updates_
- 🔧 Tech Team
- 👥 D5art Emp Team
- 📚 D5art Edu Team
- 🧠 Creative Team
-
-_2️⃣ Fun Game Activity 🎮_
-_3️⃣  Closing Talk 🎤_
-
-🕓 When: Today at 5:30 PM IST | 4:00 PM GST  
-*🔗 Join Meeting:*
-https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZGM2MDM3YjQtMDBhYS00ZTc2LTkwZmItZmM0NjdlMmI4ZjQ0%40thread.v2/0?context=%7b%22Tid%22%3a%223bd08ab7-5102-4cd6-870a-23a343442664%22%2c%22Oid%22%3a%22cc84722f-83a5-477c-ba7b-7745f7d14473%22%7d
-
-📅 Date: 09 oct, 2025
-⏰ 5:30 PM – 6:30 PM (GMT+05:30)
-
-_📣 Team Leads – Please be ready with your updates!_
